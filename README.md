@@ -17,3 +17,4 @@ https://stackoverflow.com/questions/3332991/sqlalchemy-filter-multiple-columns
 https://stackoverflow.com/questions/18208492/sqlalchemy-exc-operationalerror-operationalerror-unable-to-open-database-file
 https://stackoverflow.com/questions/48411636/create-a-key-value-pair-in-a-for-loop-using-python-and-update-the-value
 https://stackoverflow.com/questions/26792663/how-can-i-return-a-list-of-results-as-json
+https://www.geeksforgeeks.org/python-convert-a-list-to-dictionary/
