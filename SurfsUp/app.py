@@ -27,7 +27,6 @@ session = Session(engine)
 app = Flask(__name__)
 
 
-
 #################################################
 # Flask Routes
 #################################################
@@ -39,8 +38,10 @@ def homepage():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/date/start<br/>"
+        f"/api/v1.0/date/start/end<br/>"
+        f"Hint: When using dates, use the MMDDYYYY formula<br/>"
+
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -88,23 +89,28 @@ def tobs():
     # Return a JSON list of temperature observations for the previous year.
     return jsonify(tobs_list)
 
-@app.route("/api/v1.0/<start>")
-def start():
-    # Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature 
+
+@app.route("/api/v1.0/date/<start>")
+@app.route("/api/v1.0/date/<start>/<end>")
+def stats(start=None, end=None):
+    # Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature
     # for a specified start, calculate TMIN, TAVG, and TMAX for all the dates greater than or equal to the start date.
-    start = dt.date(2016, 7, 26) 
-    #end = dt. date(2017, 7, 26)
-    temp = session.query(func.tmin(Measurement.tobs), func.tmax(Measurement.tobs), func.tavg(Measurement.tobs)).\
-    filter(Measurement.date >= start).all()
+    
+    start_date = dt.datetime.strptime(start, "%m%d%Y")
+    temp = [func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)]
+    
+    if not end:
+        results = session.query(*temp).filter(Measurement.date >= start_date).all()
+    else:
+        end_date = dt.datetime.strptime(end, "%m%d%Y")
+        results = session.query(*temp).\
+            filter(Measurement.date >= start_date).\
+            filter(Measurement.date <= end_date).all()
 
-    temp_list = []
-    for temps in temp:
-        tobs = temps.tobs
-        temp_list.append(tobs)
+    session.close()
 
-    return jsonify(temp_list)
-
-
+    temps = list(np.ravel(results))
+    return jsonify(temps)
 
 
 if __name__ == "__main__":
